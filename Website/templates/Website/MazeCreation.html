@@ -1,113 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maze Creation</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+        rel="stylesheet"
     />
     <style>
-      body {
-        background-color: rgb(20, 20, 20); /* Darker background */
-      }
-      .cell-black {
-        background-color: black;
-        color: yellow; /* Set text color to yellow for black cells */
-      }
-      .cell-yellow {
-        background-color: rgb(144, 144, 6); /* Neon yellow */
-        color: rgb(144, 144, 6); /* Set text color to yellow for yellow cells */
-      }
+        body {
+            background-color: rgb(20, 20, 20); /* Darker background */
+        }
+        .cell-black {
+            background-color: black;
+            color: yellow; /* Set text color to yellow for black cells */
+        }
+        .cell-yellow {
+            background-color: rgb(144, 144, 6); /* Neon yellow */
+            color: black; /* Set text color to black for yellow cells */
+        }
     </style>
-  </head>
-  <body class="p-10">
-    <div class="container mx-auto bg-gray-900 rounded-lg shadow-lg p-8">
-      <h1 class="text-4xl font-extrabold mb-5 text-white text-center">
-        Maze Created!
-      </h1>
-      <p class="text-lg text-gray-400 text-center mb-6">
-        Fill out the form below to generate your maze.
-      </p>
-      <div class="flex justify-center">
-        <form method="post" class="space-y-6 mb-8 w-full max-w-md">
-          {% csrf_token %}
+</head>
+<body class="p-10">
+    <div class="container mx-auto flex bg-gray-900 rounded-lg shadow-lg p-8">
+        <!-- Fixed section -->
+        <div class="w-1/4 pr-4">
+            <h1 class="text-4xl font-extrabold mb-5 text-white text-center">
+                Create Maze
+            </h1>
+            <p class="text-lg text-gray-400 text-center mb-6">
+                Fill out the form below to generate your maze.
+            </p>
+            <form method="post" class="space-y-6 mb-8">
+                {% csrf_token %}
+                <div>
+                    <label for="rows" class="block text-white font-semibold mb-2">
+                        Rows:
+                    </label>
+                    <input
+                        type="number"
+                        name="rows"
+                        id="rows"
+                        value="{{ data.rows|default:0 }}"
+                        placeholder="Enter number of rows"
+                        class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
+                        required
+                    />
+                </div>
 
-          <div>
-            <label for="rows" class="block text-white font-semibold mb-2">
-              Rows:
-            </label>
-            <input
-              type="number"
-              name="rows"
-              id="rows"
-              class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
-              required
-            />
-          </div>
+                <div>
+                    <label for="cols" class="block text-white font-semibold mb-2">
+                        Columns:
+                    </label>
+                    <input
+                        type="number"
+                        name="cols"
+                        id="cols"
+                        value="{{ data.cols|default:0 }}"
+                        placeholder="Enter number of columns"
+                        class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
+                        required
+                    />
+                </div>
 
-          <div>
-            <label for="cols" class="block text-white font-semibold mb-2">
-              Columns:
-            </label>
-            <input
-              type="number"
-              name="cols"
-              id="cols"
-              class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
-              required
-            />
-          </div>
+                <div>
+                    <label for="Algo" class="block text-white font-semibold mb-2">
+                        Algorithm:
+                    </label>
+                    <select
+                        name="Algo"
+                        id="Algo"
+                        class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
+                        required
+                    >
+                        <option value="" disabled {% if not data.Algo %}selected{% endif %}>Select an algorithm</option>
+                        <option value="DFS" {% if data.Algo == 'DFS' %}selected{% endif %}>Depth-First Search</option>
+                        <option value="BFS" {% if data.Algo == 'BFS' %}selected{% endif %}>Breadth-First Search</option>
+                    </select>
+                </div>
 
-          <div>
-            <label for="Algo" class="block text-white font-semibold mb-2">
-              Algorithm:
-            </label>
-            <input
-              type="text"
-              name="Algo"
-              id="Algo"
-              class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
-              required
-            />
-          </div>
+                <button
+                    type="submit"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition duration-200"
+                >
+                    Generate Maze
+                </button>
+            </form>
+        </div>
 
-          <button
-            type="submit"
-            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded transition duration-200"
-          >
-            Submit
-          </button>
-        </form>
-      </div>
-
-      <h2 class="text-3xl font-bold mb-4 text-white text-center">
-        Generated Maze:
-      </h2>
-      <div class="flex justify-center overflow-x-auto shadow-lg">
-        <table class="border-collapse border border-gray-400">
-          <tbody>
-            {% for row in data.Matrix %}
-            <tr>
-              {% for cell in row %}
-              <td
-                class="border border-gray-400 {% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %}"
-                style="
-                  width: 50px;
-                  height: 50px;
-                  text-align: center;
-                  color: cell-yellow;
-                "
-              >
-                {{ forloop.parentloop.counter0 }},{{ forloop.counter0 }}
-              </td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+        <!-- Movable and centered section -->
+        <div class="w-3/4 flex justify-center">
+            <div class="w-4/5">
+                <h2 class="text-3xl font-bold mb-4 text-white text-center">
+                    Generated Maze:
+                </h2>
+                <div class="flex justify-center overflow-x-auto shadow-lg">
+                    <div class="w-full">
+                        <table class="border-collapse border border-gray-400 mx-auto">
+                            <tbody>
+                                {% for row in data.Matrix %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td
+                                        class="border border-gray-400 {% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %}"
+                                        style="width: 65px; height: 50px; text-align: center"
+                                    >
+                                        {{ forloop.parentloop.counter0 }},{{ forloop.counter0 }}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </body>
+</body>
 </html>

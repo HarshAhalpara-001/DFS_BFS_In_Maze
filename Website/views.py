@@ -16,18 +16,22 @@ def dice_throw(m, n):
         mat.append(li)
     return mat
 
+# def Change_Matrix()
+
 def contact_view(request):
     # Check if the request is POST (meaning the form has been submitted)
     if request.method == 'POST':
         form = MazeInfo(request.POST)  # Create a form instance with POST data
         if form.is_valid():  # Validate the form
             # Access form data using `cleaned_data`
+            Matrix= dice_throw(form.cleaned_data.get('rows'),form.cleaned_data.get('cols'))
             data={
             'rows' : form.cleaned_data.get('rows'),
             'cols' : form.cleaned_data.get('cols'),
             'Algo' : form.cleaned_data.get('Algo'),
-            'Matrix' : dice_throw(form.cleaned_data.get('rows'),form.cleaned_data.get('cols'))
+            'Matrix' : Matrix
             }
+            print(Matrix)
             return render(request, 'Website/MazeCreation.html', {'data':data,'form':form})
     else:
         form = MazeInfo()  # Empty form instance for GET requests
