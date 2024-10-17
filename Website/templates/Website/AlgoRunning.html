@@ -3,105 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Algorithm Running</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        background-color: rgb(20, 20, 20); /* Darker background */
-      }
-      .cell-black {
-        background-color: black;
-        color: yellow; /* Set text color to yellow for black cells */
-      }
-      .cell-yellow {
-        background-color: rgb(144, 144, 6); /* Neon yellow */
-        color: black; /* Set text color to black for yellow cells */
-      }
-      .cell-path {
-        background-color: green; /* Color for the path */
-        color: white; /* Set text color to white for path cells */
-      }
-    </style>
+    <title>Document</title>
   </head>
-  <body class="p-10">
-    <div class="container mx-auto flex bg-gray-900 rounded-lg shadow-lg p-8">
-      <!-- Left section for algorithm information -->
-      <div class="w-1/4 pr-4">
-        <h1 class="text-4xl font-extrabold mb-5 text-white text-center">
-          Algorithm Running
-        </h1>
-        <p class="text-lg text-gray-400 text-center mb-6">
-          Current Algorithm: {{ data.Algorithm }}
-        </p>
-        <p class="text-lg text-gray-400 text-center mb-6">Steps Taken:</p>
-        <div class="overflow-y-auto max-h-96 bg-gray-800 rounded-lg p-4 mb-6">
-          {% for step in data.intermediate_steps %}
-          <div class="text-gray-300">
-            Step {{ forloop.counter }}: {{ step }}
-          </div>
-          {% endfor %}
-        </div>
+  <body>
+    <h1>Hello I am Harsh</h1>
 
-        <!-- Navigation Form -->
-        <form
-          method="post"
-          action="{% url 'implementation' %}"
-          class="space-y-6"
-        >
-          {% csrf_token %}
-          <div>
-            <label for="step_number" class="block text-white font-semibold mb-2"
-              >Go to Step:</label
-            >
-            <input
-              type="number"
-              name="step_number"
-              id="step_number"
-              min="0"
-              max="{{ data.intermediate_steps|length|add:-1 }}"
-              placeholder="Enter step number"
-              class="w-full p-3 rounded border border-gray-600 bg-gray-800 text-white focus:outline-none focus:border-green-500 transition duration-200"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded transition duration-200"
-          >
-            Go
-          </button>
-        </form>
-      </div>
+    <!-- Form to submit form3 -->
+    <form method="POST" action="{% url 'implementation' %}">
+      {% csrf_token %}
+      <label for="id_step_number">Step Number:</label>
+      <input
+        type="number"
+        id="id_step_number"
+        name="step_number"
+        value="{{ data.step|default:0 }}"
+        min="0"
+        required
+      />
+      <button type="submit">Submit</button>
+    </form>
 
-      <!-- Center section for displaying the maze -->
-      <div class="w-3/4 flex justify-center">
-        <div class="w-4/5">
-          <h2 class="text-3xl font-bold mb-4 text-white text-center">
-            Generated Maze:
-          </h2>
-          <div class="flex justify-center overflow-x-auto shadow-lg">
-            <div class="w-full">
-              <table class="border-collapse border border-gray-400 mx-auto">
-                <tbody>
-                  {% for row in data.Matrix %}
-                  <tr>
-                    {% for cell in row %}
-                    <td
-                      class="border border-gray-400 {% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %} {% if current_step == forloop.parentloop.counter0 and current_step == forloop.counter0 %}cell-path{% endif %}"
-                      style="width: 50px; height: 50px; text-align: center"
-                    ></td>
-                    {% endfor %}
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <table>
+      {% for i in data.Step_Matrix %}
+      <tr>
+        {% for x, y in i %}
+        <td>{{ x }} {{ y }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    <p>{{ data.Step_Matrix }}</p>
+    <p>{{ data.Step_Matrix }}</p>
+    <p>{{ data.path_found }}</p>
   </body>
 </html>
