@@ -112,6 +112,7 @@ def implementation_view(request):
             stack = request.session.get('stack')
             step= request.session.get('step')
             step_number = form3.cleaned_data.get('step_number')
+            step_number = (step_number+1)%len(step)
             if 0 <= step_number < len(stack):
                 current_step = step[step_number]  # Get the specific step
                 arr1=[]
@@ -123,7 +124,7 @@ def implementation_view(request):
                 print(arr1)
                 data = {
                     'step': step_number,
-                    'intermediate_steps': stack,
+                    'intermediate_steps': stack[step_number],
                     'Step_Matrix': arr1,
                     'path_found': True
                 }

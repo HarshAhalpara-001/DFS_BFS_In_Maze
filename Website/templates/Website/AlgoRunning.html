@@ -4,36 +4,82 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <!-- Tailwind CSS CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
   </head>
-  <body>
-    <h1>Hello I am Harsh</h1>
+  <body class="bg-gray-100 p-6">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+      <h1 class="text-2xl font-bold mb-4 text-center">Hello, I am Harsh</h1>
 
-    <!-- Form to submit form3 -->
-    <form method="POST" action="{% url 'implementation' %}">
-      {% csrf_token %}
-      <label for="id_step_number">Step Number:</label>
-      <input
-        type="number"
-        id="id_step_number"
-        name="step_number"
-        value="{{ data.step|default:0 }}"
-        min="0"
-        required
-      />
-      <button type="submit">Submit</button>
-    </form>
+      <!-- Form to submit form3 -->
+      <form
+        id="autoSubmitForm"
+        method="POST"
+        action="{% url 'implementation' %}"
+        class="mb-6"
+      >
+        {% csrf_token %}
+        <div class="mb-4">
+          <label for="id_step_number" class="block text-gray-700"
+            >Step Number:</label
+          >
+          <input
+            type="number"
+            id="id_step_number"
+            name="step_number"
+            value="{{ data.step|default:0 }}"
+            min="0"
+            required
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </form>
 
-    <table>
-      {% for i in data.Step_Matrix %}
-      <tr>
-        {% for x, y in i %}
-        <td>{{ x }} {{ y }}</td>
-        {% endfor %}
-      </tr>
-      {% endfor %}
-    </table>
-    <p>{{ data.Step_Matrix }}</p>
-    <p>{{ data.Step_Matrix }}</p>
-    <p>{{ data.path_found }}</p>
+      <!-- Data Table -->
+      <table
+        class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md"
+      >
+        <thead>
+          <tr>
+            <th class="py-2 px-4 border-b bg-gray-200 text-left text-gray-600">
+              X
+            </th>
+            <th class="py-2 px-4 border-b bg-gray-200 text-left text-gray-600">
+              Y
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in data.Step_Matrix %}
+          <tr>
+            {% for x, y in i %} {% if y %}
+            <!-- <td class="bg-blue-500 text-white py-2 px-4 border-b">{{ x }}</td> -->
+            <td class="bg-blue-500 text-white py-2 px-4 border-b">{{ y }}</td>
+            {% elif x == 1 %}
+            <!-- <td class="bg-yellow-500 text-white py-2 px-4 border-b">{{ x }}</td> -->
+            <td class="bg-yellow-500 text-white py-2 px-4 border-b">{{ y }}</td>
+            {% else %}
+            <!-- <td class="bg-blue-900 text-white py-2 px-4 border-b">{{ x }}</td> -->
+            <td class="bg-blue-900 text-white py-2 px-4 border-b">{{ y }}</td>
+            {% endif %} {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="mt-4">
+        <p class="text-gray-700">Step Matrix: {{ data.Step_Matrix }}</p>
+        <p class="text-gray-700">Path Found: {{ data.path_found }}</p>
+      </div>
+    </div>
   </body>
 </html>
