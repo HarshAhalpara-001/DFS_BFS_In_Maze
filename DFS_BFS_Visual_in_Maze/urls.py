@@ -16,8 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from Website.views import hello,contact_view
+from Website.views import hello,contact_view, implementation_view
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',contact_view, name='hello'),
+    path('',contact_view, name='Display_Matrix'),
+    path('implementation/', implementation_view, name='implementation'),
 ]
