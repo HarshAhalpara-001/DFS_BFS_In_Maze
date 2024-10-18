@@ -2,6 +2,9 @@ from django.shortcuts import render, HttpResponse, redirect
 import random
 from .forms import MazeInfo, Implementation, StepNavigationForm
 from django.http import JsonResponse
+import json
+from collections import deque
+
 
 # Global variable to store the stack
 
@@ -77,8 +80,55 @@ def DFS(matrix):
     print("Calculated steps:", step)
     return found_path, stack, step
 
+def BFS(matrix):
+    steps = []
+    
+    def call(matrix, starting, ending):
+        queue = deque([starting])  # Initialize the queue with the starting position
+        visited = [[False] * len(matrix[0]) for _ in range(len(matrix))]
+        visited[starting[0]][starting[1]] = True  # Mark starting position as visited
+        path = []  # To store the path taken
+        
+        # Directions for movement: right, down, left, up
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+        while queue:
+            x, y = queue.popleft()  # Get the current position from the front of the queue
+            path.append((x, y))  # Store the current position in the path
+            steps.append([row[:] for row in visited])  # Store a copy of visited state
+            
+            if (x, y) == tuple(ending):
+                return True, path  # Path found
+            
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                
+                # Check if next position is within bounds and not visited
+                if (0 <= nx < len(matrix) and 
+                    0 <= ny < len(matrix[0]) and 
+                    matrix[nx][ny] == 0 and 
+                    not visited[nx][ny]):
+                    
+                    visited[nx][ny] = True  # Mark as visited
+                    queue.append((nx, ny))  # Add the new position to the queue
+        
+        return False, path  # No path found
+
+    starting = [0, 0]
+    ending = [len(matrix) - 1, len(matrix[0]) - 1]
+    
+    found_path, path = call(matrix, starting, ending)
+    
+    print("Calculated steps:", steps)
+    return found_path, path, steps
+
+
 
 # Implementation view to process the DFS and navigation
+# from django.http import JsonResponse
+# from django.shortcuts import render
+# import json
+
 def implementation_view(request):
     matrix = request.session.get('matrix')
     if not matrix:
@@ -86,50 +136,23 @@ def implementation_view(request):
 
     if request.method == 'POST':
         form2 = Implementation(request.POST)
-        form3 = StepNavigationForm(request.POST)
 
-        # Process the main implementation form
         if form2.is_valid():
-            found_path, stack, step = DFS(matrix)
+            Algo=form2.cleaned_data.get('Algorithm')
+            if Algo=='DFS':
+                found_path, stack, step = DFS(matrix)
+            if Algo=='BFS':
+                found_path, stack, step = BFS(matrix)
             request.session['stack'] = stack
             request.session['step'] = step
-            arr1=[]
-            for w,x in zip(matrix, step[0]):
-                arr=[]
-                for y,z in zip(w,x):
-                    arr.append([y,z])
-                arr1.append(arr)
-            # print(arr1)
+            
             data = {
-                    'intermediate_steps': stack,
-                    'Step_Matrix': arr1,
-                    'path_found': True
+                'intermediate_steps': stack,
+                'steps': step,
+                'matrix': matrix,
+                'path_found': True
             }
-            return render(request, 'Website/AlgoRunning.html', {'data': data, 'form3': form3,})
-
-        # Process the step navigation form
-        elif form3.is_valid():
-            stack = request.session.get('stack')
-            step= request.session.get('step')
-            step_number = form3.cleaned_data.get('step_number')
-            step_number = (step_number+1)%len(step)
-            if 0 <= step_number < len(stack):
-                current_step = step[step_number]  # Get the specific step
-                arr1=[]
-                for w,x in zip(matrix, current_step):
-                    arr=[]
-                    for y,z in zip(w,x):
-                        arr.append([y,z])
-                    arr1.append(arr)
-                print(arr1)
-                data = {
-                    'step': step_number,
-                    'intermediate_steps': stack[step_number],
-                    'Step_Matrix': arr1,
-                    'path_found': True
-                }
-                print(step_number)
-                return render(request, 'Website/AlgoRunning.html', {'data': data, 'form3': form3})
+            return render(request, 'Website/AlgoRunning.html', {'data': json.dumps(data)})
 
     else:
         form2 = Implementation()

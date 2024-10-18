@@ -3,83 +3,150 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <!-- Tailwind CSS CDN -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+    <title>Maze Solver - DFS</title>
+    <style>
+      /* Dark theme background */
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      h1,
+      h2 {
+        color: #ffffff;
+      }
+
+      /* Styling for the matrix table */
+      table {
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+
+      td {
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        border: 1px solid #444;
+      }
+
+      /* Styling for blocks (walls) */
+      .block {
+        background-color: #333;
+      }
+
+      /* Styling for paths (steps) */
+      .path {
+        background-color: #007bff;
+      }
+
+      /* Styling for buttons */
+      button {
+        background-color: #444;
+        color: #e0e0e0;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px 5px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+
+      button:hover {
+        background-color: #555;
+      }
+
+      /* Styling for current step indicator */
+      #step-number {
+        font-weight: bold;
+      }
+    </style>
   </head>
-  <body class="bg-gray-100 p-6">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-4 text-center">Hello, I am Harsh</h1>
+  <body>
+    <h1>Maze Solver Visualization</h1>
 
-      <!-- Form to submit form3 -->
-      <form
-        id="autoSubmitForm"
-        method="POST"
-        action="{% url 'implementation' %}"
-        class="mb-6"
-      >
-        {% csrf_token %}
-        <div class="mb-4">
-          <label for="id_step_number" class="block text-gray-700"
-            >Step Number:</label
-          >
-          <input
-            type="number"
-            id="id_step_number"
-            name="step_number"
-            value="{{ data.step|default:0 }}"
-            min="0"
-            required
-            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-          />
-        </div>
-        <button
-          type="submit"
-          class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
-        >
-          Submit
-        </button>
-      </form>
+    <!-- Display the merged matrix -->
+    <h2>Merged Maze and Steps</h2>
+    <div id="merged-matrix"></div>
 
-      <!-- Data Table -->
-      <table
-        class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md"
-      >
-        <thead>
-          <tr>
-            <th class="py-2 px-4 border-b bg-gray-200 text-left text-gray-600">
-              X
-            </th>
-            <th class="py-2 px-4 border-b bg-gray-200 text-left text-gray-600">
-              Y
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for i in data.Step_Matrix %}
-          <tr>
-            {% for x, y in i %} {% if y %}
-            <!-- <td class="bg-blue-500 text-white py-2 px-4 border-b">{{ x }}</td> -->
-            <td class="bg-blue-500 text-white py-2 px-4 border-b">{{ y }}</td>
-            {% elif x == 1 %}
-            <!-- <td class="bg-yellow-500 text-white py-2 px-4 border-b">{{ x }}</td> -->
-            <td class="bg-yellow-500 text-white py-2 px-4 border-b">{{ y }}</td>
-            {% else %}
-            <!-- <td class="bg-blue-900 text-white py-2 px-4 border-b">{{ x }}</td> -->
-            <td class="bg-blue-900 text-white py-2 px-4 border-b">{{ y }}</td>
-            {% endif %} {% endfor %}
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <!-- Display the path status -->
+    <h2>Path Found: <span id="path-status"></span></h2>
 
-      <div class="mt-4">
-        <p class="text-gray-700">Step Matrix: {{ data.Step_Matrix }}</p>
-        <p class="text-gray-700">Path Found: {{ data.path_found }}</p>
-      </div>
-    </div>
+    <!-- Display the step navigation -->
+    <h2>Steps</h2>
+    <button id="prev-step">Previous Step</button>
+    <button id="next-step">Next Step</button>
+    <p>Current Step: <span id="step-number">0</span></p>
+
+    <script>
+      // Parse the JSON data passed from Django
+      const data = JSON.parse("{{ data|escapejs }}");
+      const matrix = data.matrix;
+      const steps = data.steps;
+      const pathFound = data.path_found;
+      let currentStep = 0;
+
+      // Function to render the merged matrix with steps
+      function renderMergedMatrix(stepIndex) {
+        const container = document.getElementById("merged-matrix");
+        container.innerHTML = ""; // Clear previous content
+
+        const table = document.createElement("table");
+
+        // Loop through the rows of the matrix
+        matrix.forEach((row, rowIndex) => {
+          const tr = document.createElement("tr");
+          row.forEach((cell, colIndex) => {
+            const td = document.createElement("td");
+
+            // Check for block (1) and apply block class
+            if (cell === 1) {
+              td.classList.add("block"); // Wall
+            }
+
+            // Check if this cell is part of the current step's path
+            if (
+              stepIndex < steps.length &&
+              steps[stepIndex][rowIndex][colIndex]
+            ) {
+              td.classList.add("path"); // Highlight path
+            }
+
+            tr.appendChild(td);
+          });
+          table.appendChild(tr);
+        });
+
+        container.appendChild(table);
+      }
+
+      // Render the merged matrix for the initial step
+      renderMergedMatrix(currentStep);
+
+      // Update the path status
+      document.getElementById("path-status").textContent = pathFound
+        ? "Yes"
+        : "No";
+
+      // Event listeners for the navigation buttons
+      document.getElementById("next-step").addEventListener("click", () => {
+        if (currentStep < steps.length - 1) {
+          currentStep++;
+          renderMergedMatrix(currentStep);
+          document.getElementById("step-number").textContent = currentStep;
+        }
+      });
+
+      document.getElementById("prev-step").addEventListener("click", () => {
+        if (currentStep > 0) {
+          currentStep--;
+          renderMergedMatrix(currentStep);
+          document.getElementById("step-number").textContent = currentStep;
+        }
+      });
+    </script>
   </body>
 </html>
