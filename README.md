@@ -1,4 +1,4 @@
-```markdown
+---
 # Maze Solver - DFS & BFS Visualization
 
 Welcome to the Maze Solver project! This application visualizes pathfinding algorithms, specifically Depth First Search (DFS) and Breadth First Search (BFS), within a randomly generated maze.
@@ -117,5 +117,5 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
+
 
