@@ -1,163 +1,153 @@
-from django.shortcuts import render, HttpResponse, redirect
-import random
-from .forms import MazeInfo, Implementation, StepNavigationForm
-from django.http import JsonResponse
-import json
+from django.shortcuts import render
 from collections import deque
+import random
+import json
+from .forms import MazeInfo, Implementation, StepNavigationForm
 
-# Simple hello world view
-def hello(request):
-    return HttpResponse('Hello, this is Harsh')
-
-# Function to create a random matrix with specified number of blocks
 def dice_throw(m, n, blocks):
-    sequence = []
-    num_empty = int((1-blocks) * 10)  # Number of empty spaces (0s)
-    num_blocks = int((blocks) * 10)
-    sequence.extend([0] * num_empty)
-    sequence.extend([1] * num_blocks)
+    """Creates a random matrix with specified number of blocks."""
+    num_empty = int((1 - blocks) * 10)
+    num_blocks = int(blocks * 10)
+    sequence = [0] * num_empty + [1] * num_blocks
     return [[random.choice(sequence) for _ in range(n)] for _ in range(m)]
 
-# View for the contact form and maze creation
+class MazeSessionData:
+    """Class to manage session data for the maze."""
+    def __init__(self, request):
+        self.request = request
+
+    @property
+    def matrix(self):
+        return self.request.session.get('matrix')
+
+    @matrix.setter
+    def matrix(self, value):
+        self.request.session['matrix'] = value
+
+    @property
+    def stack(self):
+        return self.request.session.get('stack', [])
+
+    @stack.setter
+    def stack(self, value):
+        self.request.session['stack'] = value
+
+    @property
+    def step(self):
+        return self.request.session.get('step', [])
+
+    @step.setter
+    def step(self, value):
+        self.request.session['step'] = value
+
 def contact_view(request):
+    """View for the maze creation form."""
     form1 = MazeInfo(request.POST or None)
     form2 = Implementation(request.POST or None)
 
     if request.method == 'POST' and form1.is_valid():
-        rows = form1.cleaned_data.get('rows')
-        cols = form1.cleaned_data.get('cols')
-        blocks = form1.cleaned_data.get('blocks')
-
+        rows, cols, blocks = form1.cleaned_data.values()
         matrix = dice_throw(rows, cols, blocks)
-        request.session['matrix'] = matrix
+
+        maze_session = MazeSessionData(request)
+        maze_session.matrix = matrix
 
         return render(request, 'Website/MazeCreation.html', {
-            'data': {
-                'rows': rows,
-                'cols': cols,
-                'Matrix': matrix
-            },
+            'data': {'rows': rows, 'cols': cols, 'Matrix': matrix},
             'form1': form1,
             'form2': form2
         })
 
-    return render(request, 'Website/MazeCreation.html', {
-        'form1': form1,
-        'form2': form2
-    })
+    return render(request, 'Website/MazeCreation.html', {'form1': form1, 'form2': form2})
 
-# Depth First Search function to find path in the maze
 def DFS(matrix, starting, ending):
-    step = []
-    
-    def call(matrix, visited, x, y, ending, stack):
+    """Depth First Search to find a path in the maze."""
+    visited = [[False] * len(matrix[0]) for _ in range(len(matrix))]
+    stack, steps = [], []
+
+    def call(x, y):
         if visited[x][y]:
             return False
-        
         visited[x][y] = True
         stack.append((x, y))
-        step.append([row[:] for row in visited])
-        
+        steps.append([row[:] for row in visited])
+
         if (x, y) == tuple(ending):
             return True
-        
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        for dx, dy in directions:
+
+        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
             nx, ny = x + dx, y + dy
-            if (0 <= nx < len(matrix) and 
-                0 <= ny < len(matrix[0]) and 
-                matrix[nx][ny] == 0 and 
-                not visited[nx][ny]):
-                if call(matrix, visited, nx, ny, ending, stack):
+            if (0 <= nx < len(matrix) and 0 <= ny < len(matrix[0]) and
+                    matrix[nx][ny] == 0 and not visited[nx][ny]):
+                if call(nx, ny):
                     return True
-        
+
         visited[x][y] = False
         stack.pop()
         return False
 
-    visited = [[False] * len(matrix[0]) for _ in range(len(matrix))]
-    stack = []
-    found_path = call(matrix, visited, starting[0], starting[1], ending, stack)
-    
-    return found_path, stack, step
+    found_path = call(starting[0], starting[1])
+    return found_path, stack, steps
 
-# Breadth First Search function to find path in the maze
 def BFS(matrix, starting, ending):
-    steps = []
-    
-    def call(matrix, starting, ending):
-        queue = deque([starting])
-        visited = [[False] * len(matrix[0]) for _ in range(len(matrix))]
-        visited[starting[0]][starting[1]] = True
-        path = []
-        
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    """Breadth First Search to find a path in the maze."""
+    visited = [[False] * len(matrix[0]) for _ in range(len(matrix))]
+    queue = deque([starting])
+    visited[starting[0]][starting[1]] = True
+    path, steps = [], []
 
-        while queue:
-            x, y = queue.popleft()
-            path.append((x, y))
-            steps.append([row[:] for row in visited])
-            
-            if (x, y) == tuple(ending):
-                return True, path
-            
-            for dx, dy in directions:
-                nx, ny = x + dx, y + dy
-                if (0 <= nx < len(matrix) and 
-                    0 <= ny < len(matrix[0]) and 
-                    matrix[nx][ny] == 0 and 
-                    not visited[nx][ny]):
-                    visited[nx][ny] = True
-                    queue.append((nx, ny))
-        
-        return False, path
+    while queue:
+        x, y = queue.popleft()
+        path.append((x, y))
+        steps.append([row[:] for row in visited])
 
-    found_path, path = call(matrix, starting, ending)
-    
-    return found_path, path, steps
+        if (x, y) == tuple(ending):
+            return True, path, steps
 
-# Implementation view to process the DFS and navigation
+        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            nx, ny = x + dx, y + dy
+            if (0 <= nx < len(matrix) and 0 <= ny < len(matrix[0]) and
+                    matrix[nx][ny] == 0 and not visited[nx][ny]):
+                visited[nx][ny] = True
+                queue.append((nx, ny))
+
+    return False, path, steps
+
 def implementation_view(request):
-    matrix = request.session.get('matrix')
-    if not matrix:
-        return JsonResponse({'error': 'Matrix has not been initialized.'}, status=400)
+    """View to process maze algorithms."""
+    maze_session = MazeSessionData(request)
 
-    stack = []  # Ensure stack is initialized
-    step = []   # Ensure step is initialized
+    if not maze_session.matrix:
+        return JsonResponse({'error': 'Matrix has not been initialized.'}, status=400)
 
     if request.method == 'POST':
         form2 = Implementation(request.POST)
 
         if form2.is_valid():
-            algo = form2.cleaned_data.get('Algorithm')
-            starting_x = form2.cleaned_data.get('starting_X')
-            starting_y = form2.cleaned_data.get('starting_Y')
-            ending_x = form2.cleaned_data.get('Ending_X')
-            ending_y = form2.cleaned_data.get('Ending_Y')
-
-            starting = [starting_x, starting_y]
-            ending = [ending_x, ending_y]
-
+            algo = form2.cleaned_data['Algorithm']
+            starting = [form2.cleaned_data['starting_X'], form2.cleaned_data['starting_Y']]
+            ending = [form2.cleaned_data['Ending_X'], form2.cleaned_data['Ending_Y']]
+            if maze_session.matrix[starting[0]][starting[1]] == 1 or maze_session.matrix[ending[0]][ending[1]] ==1:
+                return render(request, 'Website/MazeCreation.html', {'form1': MazeInfo(), 'form2': form2,})
             if algo == 'DFS':
-                found_path, stack, step = DFS(matrix, starting, ending)
+                found_path, stack, step = DFS(maze_session.matrix, starting, ending)
             elif algo == 'BFS':
-                found_path, stack, step = BFS(matrix, starting, ending)
+                found_path, stack, step = BFS(maze_session.matrix, starting, ending)
             else:
                 return JsonResponse({'error': 'Invalid algorithm selected.'}, status=400)
 
-            request.session['stack'] = stack
-            request.session['step'] = step
+            maze_session.stack = stack
+            maze_session.step = step
             
             data = {
                 'intermediate_steps': stack,
                 'steps': step,
-                'matrix': matrix,
+                'matrix': maze_session.matrix,
                 'path_found': found_path
             }
             return render(request, 'Website/AlgoRunning.html', {'data': json.dumps(data)})
 
-    else:
-        form2 = Implementation()
-        form3 = StepNavigationForm()
+    form2 = Implementation()
+    form3 = StepNavigationForm()
 
     return render(request, 'Website/MazeCreation.html', {'form1': MazeInfo(), 'form2': form2, 'form3': form3})
