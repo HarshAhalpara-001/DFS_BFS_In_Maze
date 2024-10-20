@@ -1,7 +1,7 @@
 ---
 # Maze Solver - DFS & BFS Visualization
 
-Welcome to the Maze Solver project! This application visualizes pathfinding algorithms, specifically Depth First Search (DFS) and Breadth First Search (BFS), within a randomly generated maze.
+Welcome to the Maze Solver project! This application visualizes pathfinding algorithms within a randomly generated maze, specifically Depth First Search (DFS) and Breadth First Search (BFS).
 
 ## Table of Contents
 - [Features](#features)
@@ -45,7 +45,7 @@ To set up this project locally, follow these steps:
 
 3. **Install Dependencies**:
    ```bash
-   pip install -r requirements.txt
+   pip install django
    ```
 
 4. **Run the Server**:
@@ -114,8 +114,5 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 3. Make your changes and commit them: `git commit -m 'Add some feature'`.
 4. Push to the branch: `git push origin feature-name`.
 5. Open a Pull Request.
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 
