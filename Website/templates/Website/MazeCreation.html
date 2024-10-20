@@ -105,17 +105,18 @@
         <!-- First Form for Maze Info -->
         <form method="post" action="{% url 'Display_Matrix' %}">
           {% csrf_token %} {{ form1.as_p }}
-          <!-- Render the MazeInfo form including the new blocks field -->
+          <!-- Render the MazeInfo form including rows, cols, and blocks field -->
 
           <button type="submit">Generate Maze</button>
         </form>
 
         <!-- Second Form for Algorithm Selection -->
+        <h2 class="text-3xl font-bold mt-6 mb-4">Apply Algorithm</h2>
         <form method="post" action="{% url 'implementation' %}">
           {% csrf_token %} {{ form2.as_p }}
-          <!-- Render the Algorithm selection form -->
+          <!-- Render the Algorithm selection form including starting_x, starting_y, ending_x, ending_y -->
 
-          <button type="submit">Apply Algorithm</button>
+          <button type="submit">Run Algorithm</button>
         </form>
       </div>
 
@@ -129,7 +130,7 @@
               <tr>
                 {% for cell in row %}
                 <td
-                  class="border table-cell {% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %}"
+                  class="{% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %}"
                 >
                   {{ forloop.parentloop.counter0 }},{{ forloop.counter0 }}
                 </td>
