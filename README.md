@@ -1,5 +1,6 @@
-# Maze Solver - DFS & BFS Visualization
 ---
+# Maze Solver - DFS & BFS Visualization
+
 Welcome to the Maze Solver project! This application visualizes pathfinding algorithms within a randomly generated maze, specifically Depth First Search (DFS) and Breadth First Search (BFS).
 
 ## Table of Contents
