@@ -1,152 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maze Creation - Dark Theme</title>
     <style>
-        /* Dark theme background */
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        
-        h1, h2 {
-            color: #ffffff;
-        }
+      /* Dark theme background */
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
 
-        .container {
-            display: flex;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+      h1,
+      h2 {
+        color: #ffffff;
+      }
 
-        .form-section {
-            flex: 1;
-            padding-right: 20px;
-        }
+      .container {
+        display: flex;
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
 
-        .maze-section {
-            flex: 2;
-            overflow: auto;
-        }
+      .form-section {
+        flex: 1;
+        padding-right: 20px;
+      }
 
-        /* Styling for the maze table */
-        table {
-            border-collapse: collapse;
-            margin: 10px auto;
-        }
+      .maze-section {
+        flex: 2;
+        overflow: auto;
+      }
 
-        td {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            border: 1px solid #444;
-        }
+      /* Styling for the maze table */
+      table {
+        border-collapse: collapse;
+        margin: 10px auto;
+      }
 
-        /* Styling for blocks (walls) */
-        .cell-black {
-            background-color: #333;
-        }
+      td {
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        border: 1px solid #444;
+      }
 
-        /* Styling for paths (steps) */
-        .cell-yellow {
-            background-color: rgb(144, 144, 6);
-        }
+      /* Styling for blocks (walls) */
+      .cell-black {
+        background-color: #333;
+      }
 
-        /* Styling for buttons */
-        button {
-            background-color: #444;
-            color: #e0e0e0;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px 5px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
+      /* Styling for paths (steps) */
+      .cell-yellow {
+        background-color: rgb(144, 144, 6);
+      }
 
-        button:hover {
-            background-color: #555;
-        }
+      /* Styling for buttons */
+      button {
+        background-color: #444;
+        color: #e0e0e0;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px 5px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
 
-        /* Styling for form inputs */
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background-color: #333;
-            color: #e0e0e0;
-        }
+      button:hover {
+        background-color: #555;
+      }
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: #007bff;
-        }
+      /* Styling for form inputs */
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background-color: #333;
+        color: #e0e0e0;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #007bff;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <!-- Fixed section for the first form -->
-        <div class="form-section">
-            <h1 class="text-4xl font-extrabold mb-5">Create Maze</h1>
-            <p class="text-lg mb-6">Fill out the form below to generate your maze.</p>
+      <!-- Fixed section for the first form -->
+      <div class="form-section">
+        <h1 class="text-4xl font-extrabold mb-5">Create Maze</h1>
+        <p class="text-lg mb-6">
+          Fill out the form below to generate your maze.
+        </p>
 
-            <!-- First Form for Maze Info -->
-            <form method="post" action="{% url 'Display_Matrix' %}" class="space-y-6 mb-8">
-                {% csrf_token %}
-                <div>
-                    <label for="rows" class="block font-semibold mb-2">Rows:</label>
-                    <input type="number" name="rows" id="rows" value="{{ data.rows|default:0 }}" placeholder="Enter number of rows" required />
-                </div>
+        <!-- First Form for Maze Info -->
+        <form method="post" action="{% url 'Display_Matrix' %}">
+          {% csrf_token %} {{ form1.as_p }}
+          <!-- Render the MazeInfo form including the new blocks field -->
 
-                <div>
-                    <label for="cols" class="block font-semibold mb-2">Columns:</label>
-                    <input type="number" name="cols" id="cols" value="{{ data.cols|default:0 }}" placeholder="Enter number of columns" required />
-                </div>
+          <button type="submit">Generate Maze</button>
+        </form>
 
-                <button type="submit">Generate Maze</button>
-            </form>
+        <!-- Second Form for Algorithm Selection -->
+        <form method="post" action="{% url 'implementation' %}">
+          {% csrf_token %} {{ form2.as_p }}
+          <!-- Render the Algorithm selection form -->
 
-            <!-- Second Form for Algorithm Selection -->
-            <form method="post" action="{% url 'implementation' %}" class="space-y-6">
-                {% csrf_token %}
-                <div>
-                    <label for="Algorithm" class="block font-semibold mb-2">Algorithm:</label>
-                    <select name="Algorithm" id="Algorithm" required>
-                        <option value="DFS" {% if data.Algo == 'DFS' %}selected{% endif %}>Depth-First Search</option>
-                        <option value="BFS" {% if data.Algo == 'BFS' %}selected{% endif %}>Breadth-First Search</option>
-                    </select>
-                </div>
+          <button type="submit">Apply Algorithm</button>
+        </form>
+      </div>
 
-                <button type="submit">Apply Algorithm</button>
-            </form>
+      <!-- Movable and centered section -->
+      <div class="maze-section">
+        <h2 class="text-3xl font-bold mb-4">Generated Maze:</h2>
+        <div class="flex justify-center overflow-x-auto">
+          <table>
+            <tbody>
+              {% for row in data.Matrix %}
+              <tr>
+                {% for cell in row %}
+                <td
+                  class="border table-cell {% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %}"
+                >
+                  {{ forloop.parentloop.counter0 }},{{ forloop.counter0 }}
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-
-        <!-- Movable and centered section -->
-        <div class="maze-section">
-            <h2 class="text-3xl font-bold mb-4">Generated Maze:</h2>
-            <div class="flex justify-center overflow-x-auto">
-                <table>
-                    <tbody>
-                        {% for row in data.Matrix %}
-                        <tr>
-                            {% for cell in row %}
-                            <td class="border table-cell {% if cell == 0 %}cell-black{% else %}cell-yellow{% endif %}">
-                                {{ forloop.parentloop.counter0 }},{{ forloop.counter0 }}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

@@ -12,30 +12,43 @@ from collections import deque
 def hello(request):
     return HttpResponse('Hello, this is Harsh')
 
-# Function to create a random matrix
-def dice_throw(m, n):
-    sequence = [0, 0, 0, 0, 1]  # 3/5 empty, 2/5 filled
+# Function to create a random matrix with specified number of blocks
+def dice_throw(m, n, blocks):
+    # Initialize matrix with all empty cells (0)
+    sequence = []
+    num_empty = int((1 - blocks) * 10)  # Number of empty spaces (0s)
+    num_blocks = int(blocks * 10)
+    sequence.extend([0] * num_empty)
+    sequence.extend([1] * num_blocks)
     return [[random.choice(sequence) for _ in range(n)] for _ in range(m)]
 
-# View for contact form and maze creation
+# View for the contact form and maze creation
 def contact_view(request):
-    form1 = MazeInfo(request.POST or None)
+    form1 = MazeInfo(request.POST or None)  # MazeInfo form
+    form2 = Implementation(request.POST or None)  # Algorithm selection form
+
     if request.method == 'POST' and form1.is_valid():
         rows = form1.cleaned_data.get('rows')
         cols = form1.cleaned_data.get('cols')
-        request.session['matrix'] = dice_throw(rows, cols)
+        blocks = form1.cleaned_data.get('blocks')  # Get the number of blocks
+
+        matrix = dice_throw(rows, cols, blocks)
+        request.session['matrix'] = matrix  # Store matrix in session
+        
         return render(request, 'Website/MazeCreation.html', {
             'data': {
                 'rows': rows,
                 'cols': cols,
-                'Matrix': request.session['matrix']
+                'Matrix': matrix
             },
-            'form1': form1,
-            'form2': Implementation()
+            'form1': form1,  # Pass the MazeInfo form
+            'form2': form2   # Pass the Implementation form
         })
-    
-    return render(request, 'Website/MazeCreation.html', {'form1': form1, 'form2': Implementation()})
 
+    return render(request, 'Website/MazeCreation.html', {
+        'form1': form1,  # Pass the MazeInfo form
+        'form2': form2   # Pass the Implementation form
+    })
 # Depth First Search function to find path in the maze
 def DFS(matrix):
     step = []
