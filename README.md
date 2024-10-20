@@ -1,6 +1,5 @@
----
 # Maze Solver - DFS & BFS Visualization
-
+---
 Welcome to the Maze Solver project! This application visualizes pathfinding algorithms within a randomly generated maze, specifically Depth First Search (DFS) and Breadth First Search (BFS).
 
 ## Table of Contents
@@ -11,6 +10,7 @@ Welcome to the Maze Solver project! This application visualizes pathfinding algo
 - [How It Works](#how-it-works)
 - [Algorithms Explained](#algorithms-explained)
 - [Screenshots](#screenshots)
+- [Live Website](#live-website)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -102,10 +102,12 @@ The maze is represented as a grid of cells, where each cell can either be a wall
 ## Screenshots
 ### Maze Generation
 ![Screenshot 2024-10-20 225056](https://github.com/user-attachments/assets/c888f73e-2dcf-484d-9985-efd39dccc912)
-)
 
 ### Pathfinding Visualization
 ![Screenshot 2024-10-20 225142](https://github.com/user-attachments/assets/7fce81c6-f87e-44b8-80e4-8df6f73a0e70)
+
+## Live Website
+You can access the live version of the application at [Maze Solver Live](https://pythonbyh.pythonanywhere.com/implementation/). Please note that the availability of this site may vary; it can be active or inactive at times.
 
 ## Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests to improve this project. To contribute, please follow these steps:
@@ -114,5 +116,3 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 3. Make your changes and commit them: `git commit -m 'Add some feature'`.
 4. Push to the branch: `git push origin feature-name`.
 5. Open a Pull Request.
-
-
