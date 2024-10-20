@@ -108,7 +108,7 @@ The maze is represented as a grid of cells, where each cell can either be a wall
 ![Screenshot 2024-10-20 225142](https://github.com/user-attachments/assets/7fce81c6-f87e-44b8-80e4-8df6f73a0e70)
 
 ## Live Website
-You can access the live version of the application at [Maze Solver Live](https://pythonbyh.pythonanywhere.com/implementation/). Please note that the availability of this site may vary; it can be active or inactive at times.
+You can access the live version of the application at [**Link**](https://pythonbyh.pythonanywhere.com/). Please note that the availability of this site may vary; it can be active or inactive at times.
 
 ## Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests to improve this project. To contribute, please follow these steps:
